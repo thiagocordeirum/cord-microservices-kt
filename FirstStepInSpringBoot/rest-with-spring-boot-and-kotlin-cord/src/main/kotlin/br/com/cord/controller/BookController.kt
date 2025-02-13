@@ -2,10 +2,15 @@ package br.com.cord.controller
 
 import br.com.cord.controller.request.PostBookRequest
 import br.com.cord.controller.request.PutBookRequest
+import br.com.cord.controller.response.BookResponse
 import br.com.cord.service.BookService
 import br.com.cord.service.CustomerService
 import br.com.cord.extension.toBookModel
-import br.com.cord.model.BookModel
+import br.com.cord.extension.toBookResponse
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties.Pageable
+import org.springframework.data.domain.Page
+import org.springframework.data.web.PageableDefault
+
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.*
 
@@ -17,8 +22,8 @@ class BookController(
 ) {
 
     @GetMapping
-    fun getAll(@RequestParam name: String?): List<BookModel> {
-        return bookService.getAll(name)
+    fun getAll(@PageableDefault(page = 0, size = 10)pageable: org.springframework.data.domain.Pageable, @RequestParam name: String?): Page<BookResponse> {
+        return bookService.getAll(pageable,name).map {it.toBookResponse()}
     }
 
 
@@ -31,14 +36,14 @@ class BookController(
 
 
     @GetMapping("/{id}")
-    fun getBookById(@PathVariable id: Int): BookModel {
-        return bookService.getBookById(id)
+    fun getBookById(@PathVariable id: Int): BookResponse {
+        return bookService.getBookById(id).toBookResponse()
     }
 
 
     @GetMapping("/actives")
-    fun findActives(): List<BookModel>{
-        return bookService.findActives()
+    fun findActives(): List<BookResponse>{
+        return bookService.findActives().map{it.toBookResponse()}
     }
 
 

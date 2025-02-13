@@ -2,7 +2,9 @@ package br.com.cord.controller
 
 import br.com.cord.controller.request.PostCustomerRequest
 import br.com.cord.controller.request.PutCustomerRequest
+import br.com.cord.controller.response.CustomerResponse
 import br.com.cord.extension.toCustomerModel
+import br.com.cord.extension.toCustomerResponse
 import br.com.cord.model.CustomerModel
 import br.com.cord.service.CustomerService
 import org.springframework.http.HttpStatus
@@ -15,8 +17,8 @@ class CustomerController(
 ) {
 
     @GetMapping
-    fun getAll(@RequestParam name: String?): List<CustomerModel> {
-        return customerService.getAll(name)
+    fun getAll(@RequestParam name: String?): List<CustomerResponse> {
+        return customerService.getAll(name).map{it.toCustomerResponse()}
     }
 
 
@@ -28,15 +30,16 @@ class CustomerController(
 
 
     @GetMapping("/{id}")
-    fun getCustomerById(@PathVariable id: Int): CustomerModel{
-        return customerService.getCustomerById(id)
+    fun getCustomerById(@PathVariable id: Int): CustomerResponse{
+        return customerService.getCustomerById(id).toCustomerResponse()
     }
 
 
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     fun updateCustomer(@PathVariable id: Int, @RequestBody customer: PutCustomerRequest) {
-        customerService.updateCustomer(customer.toCustomerModel(id))
+        val customerSaved = customerService.getCustomerById(id)
+        customerService.updateCustomer(customer.toCustomerModel(customerSaved))
     }
 
 
